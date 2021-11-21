@@ -4,51 +4,54 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
-
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="270dp"
-        android:layout_height="46dp"
-        android:text="WorkStamper"
-        android:textAlignment="center"
-        android:textSize="34sp"
-        tools:layout_editor_absoluteX="65dp"
-        tools:layout_editor_absoluteY="27dp" />
+    tools:context=".LoginActivity">
 
     <EditText
-        android:id="@+id/editTextTextEmailAddress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:id="@+id/companyIdBox"
+        android:layout_width="288dp"
+        android:layout_height="55dp"
+        android:layout_marginBottom="16dp"
         android:ems="10"
-        android:hint="COMPANY ID"
+        android:hint="Company name"
         android:inputType="text"
-        tools:layout_editor_absoluteX="98dp"
-        tools:layout_editor_absoluteY="315dp" />
+        app:layout_constraintBottom_toTopOf="@+id/userIdBox"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <EditText
-        android:id="@+id/editTextNumberPassword"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:id="@+id/userIdBox"
+        android:layout_width="288dp"
+        android:layout_height="55dp"
+        android:layout_marginBottom="60dp"
         android:ems="10"
-        android:hint="USER ID"
+        android:hint="User ID"
         android:inputType="text"
-        tools:layout_editor_absoluteX="95dp"
-        tools:layout_editor_absoluteY="382dp" />
-
-    <Button
-        android:id="@+id/button3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="LOGIN"
-        tools:layout_editor_absoluteX="153dp"
-        tools:layout_editor_absoluteY="474dp" />
+        app:layout_constraintBottom_toTopOf="@+id/loginButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.504"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="203dp"
-        android:layout_height="152dp"
-        app:srcCompat="@android:drawable/ic_popup_sync"
-        tools:layout_editor_absoluteX="98dp"
-        tools:layout_editor_absoluteY="116dp" />
+        android:layout_width="356dp"
+        android:layout_height="120dp"
+        android:layout_marginTop="32dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@android:drawable/ic_popup_sync" />
+
+    <Button
+        android:id="@+id/loginButton"
+        android:layout_width="288dp"
+        android:layout_height="67dp"
+        android:layout_marginBottom="32dp"
+        android:onClick="onClickLogin"
+        android:text="Login"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
