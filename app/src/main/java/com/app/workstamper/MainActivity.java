@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -13,6 +14,9 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity
@@ -20,7 +24,9 @@ public class MainActivity extends AppCompatActivity
     private Button
             timeBtn,
             dateBtn,
-            stampBtn;
+            stampBtn,
+            logoutBtn;
+
     private CheckBox
             foodBreakBox;
     private TextView
@@ -30,6 +36,7 @@ public class MainActivity extends AppCompatActivity
     private Calendar
             selectedDateTime,
             startDateTime;
+    FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -43,12 +50,31 @@ public class MainActivity extends AppCompatActivity
            String companyID = extras.getString("CompanyID");
         */
 
+        mAuth = FirebaseAuth.getInstance();
+
         timeBtn = findViewById(R.id.timeButton);
         dateBtn = findViewById(R.id.dateButton);
         stampBtn = findViewById(R.id.stampButton);
         hoursLbl = findViewById(R.id.hoursLabel);
         foodBreakBox = findViewById(R.id.fbreakCheckbox);
+        logoutBtn = findViewById(R.id.logoutButton);
         UpdateView();
+
+        logoutBtn.setOnClickListener(view ->{
+            mAuth.signOut();
+            startActivity(new Intent(MainActivity.this, LoginActivity.class));
+
+        });
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null){
+            startActivity(new Intent(MainActivity.this, LoginActivity.class));
+        }
     }
 
     void UpdateView()

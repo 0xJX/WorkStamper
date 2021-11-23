@@ -7,29 +7,42 @@
     tools:context=".LoginActivity">
 
     <EditText
-        android:id="@+id/companyIdBox"
+        android:id="@+id/passwordBox"
         android:layout_width="288dp"
         android:layout_height="55dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="64dp"
         android:ems="10"
-        android:hint="Company name"
+        android:hint="Password"
         android:inputType="text"
-        app:layout_constraintBottom_toTopOf="@+id/userIdBox"
+        app:layout_constraintBottom_toTopOf="@+id/loginButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.495"
         app:layout_constraintStart_toStartOf="parent" />
 
     <EditText
-        android:id="@+id/userIdBox"
+        android:id="@+id/emailBox"
         android:layout_width="288dp"
         android:layout_height="55dp"
-        android:layout_marginBottom="60dp"
+        android:layout_marginBottom="12dp"
         android:ems="10"
-        android:hint="User ID"
+        android:hint="Email"
         android:inputType="text"
-        app:layout_constraintBottom_toTopOf="@+id/loginButton"
+        app:layout_constraintBottom_toTopOf="@+id/passwordBox"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.504"
+        app:layout_constraintHorizontal_bias="0.487"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/loginButton"
+        android:layout_width="288dp"
+        android:layout_height="67dp"
+        android:layout_marginBottom="260dp"
+        android:onClick="onClickLogin"
+        android:text="Login"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.487"
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView
@@ -42,16 +55,4 @@
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@android:drawable/ic_popup_sync" />
 
-    <Button
-        android:id="@+id/loginButton"
-        android:layout_width="288dp"
-        android:layout_height="67dp"
-        android:layout_marginBottom="32dp"
-        android:onClick="onClickLogin"
-        android:text="Login"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.495"
-        app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
