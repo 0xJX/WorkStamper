@@ -24,8 +24,7 @@ public class MainActivity extends AppCompatActivity
     private Button
             timeBtn,
             dateBtn,
-            stampBtn,
-            logoutBtn;
+            stampBtn;
 
     private CheckBox
             foodBreakBox;
@@ -46,7 +45,6 @@ public class MainActivity extends AppCompatActivity
 
         /*
            Bundle extras = getIntent().getExtras();
-           String userID = extras.getString("UserID");
            String companyID = extras.getString("CompanyID");
         */
 
@@ -57,22 +55,18 @@ public class MainActivity extends AppCompatActivity
         stampBtn = findViewById(R.id.stampButton);
         hoursLbl = findViewById(R.id.hoursLabel);
         foodBreakBox = findViewById(R.id.fbreakCheckbox);
-        logoutBtn = findViewById(R.id.logoutButton);
         UpdateView();
-
-        logoutBtn.setOnClickListener(view ->{
-            mAuth.signOut();
-            startActivity(new Intent(MainActivity.this, LoginActivity.class));
-
-        });
-
     }
 
     @Override
-    protected void onStart() {
+    protected void onStart()
+    {
         super.onStart();
         FirebaseUser user = mAuth.getCurrentUser();
-        if (user == null){
+
+        // User was null, return back to login. (unless debugSkipLogin is set to true)
+        if (user == null && !LoginActivity.debugSkipLogin)
+        {
             startActivity(new Intent(MainActivity.this, LoginActivity.class));
         }
     }
@@ -176,5 +170,16 @@ public class MainActivity extends AppCompatActivity
         startDateTime = (Calendar)selectedDateTime.clone();
 
         UpdateView();
+    }
+
+    public void onClickHistory(View view)
+    {
+        startActivity(new Intent(MainActivity.this, HistoryActivity.class));
+    }
+
+    public void onClickLogout(View view)
+    {
+        mAuth.signOut();
+        startActivity(new Intent(MainActivity.this, LoginActivity.class));
     }
 }

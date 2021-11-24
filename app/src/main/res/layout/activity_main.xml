@@ -10,46 +10,37 @@
         android:id="@+id/logoutButton"
         android:layout_width="155dp"
         android:layout_height="75dp"
-        android:layout_marginEnd="220dp"
+        android:layout_marginEnd="48dp"
         android:layout_marginBottom="16dp"
+        android:onClick="onClickLogout"
         android:text="LOGOUT"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toStartOf="@+id/stampButton" />
 
     <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="65dp"
-        android:layout_height="65dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="7dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@android:drawable/ic_menu_manage" />
-
-    <ImageView
-        android:id="@+id/imageView2"
-        android:layout_width="65dp"
-        android:layout_height="65dp"
-        android:layout_marginTop="7dp"
+        android:id="@+id/historyButton"
+        android:layout_width="61dp"
+        android:layout_height="59dp"
+        android:layout_marginTop="36dp"
         android:layout_marginEnd="16dp"
+        android:contextClickable="true"
+        android:onClick="onClickHistory"
         android:rotationX="0"
         android:rotationY="180"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@android:drawable/ic_menu_sort_by_size" />
+        app:srcCompat="@android:drawable/ic_menu_sort_by_size"
+        tools:ignore="SpeakableTextPresentCheck" />
 
     <TextView
         android:id="@+id/textView1"
         android:layout_width="281dp"
         android:layout_height="38dp"
-        android:layout_marginStart="65dp"
-        android:layout_marginTop="80dp"
-        android:layout_marginEnd="65dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="16dp"
         android:text="Matti Meikäläinen"
         android:textAlignment="center"
         android:textSize="25sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -67,15 +58,12 @@
     <TextView
         android:id="@+id/textView2"
         android:layout_width="281dp"
-        android:layout_height="38dp"
-        android:layout_marginStart="65dp"
+        android:layout_height="28dp"
+        android:layout_marginStart="32dp"
         android:layout_marginTop="4dp"
-        android:layout_marginEnd="65dp"
         android:text="OAMK"
         android:textAlignment="center"
-        android:textSize="25sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView1" />
 
@@ -83,31 +71,19 @@
         android:id="@+id/timeButton"
         android:layout_width="343dp"
         android:layout_height="107dp"
-        android:layout_marginTop="200dp"
+        android:layout_marginTop="4dp"
         android:onClick="onClickTime"
         android:text="14:00"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/dateButton"
-        android:layout_width="343dp"
-        android:layout_height="107dp"
-        android:layout_marginTop="36dp"
-        android:onClick="onClickDate"
-        android:text="21.11.2011"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/timeButton" />
+        app:layout_constraintTop_toBottomOf="@+id/textView5" />
 
     <TextView
         android:id="@+id/textView5"
         android:layout_width="138dp"
         android:layout_height="19dp"
-        android:layout_marginTop="180dp"
+        android:layout_marginTop="144dp"
         android:text="Select time:"
         android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="parent"
@@ -119,7 +95,7 @@
         android:id="@+id/textView4"
         android:layout_width="136dp"
         android:layout_height="20dp"
-        android:layout_marginTop="17dp"
+        android:layout_marginTop="12dp"
         android:text="Select date:"
         android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="parent"
@@ -127,30 +103,29 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/timeButton" />
 
-    <TextView
-        android:id="@+id/textView6"
-        android:layout_width="177dp"
-        android:layout_height="35dp"
-        android:layout_marginStart="34dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="38dp"
-        android:text="REPLACE ME WITH LOGO"
-        app:layout_constraintEnd_toStartOf="@+id/imageView2"
-        app:layout_constraintStart_toEndOf="@+id/imageView"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <CheckBox
         android:id="@+id/fbreakCheckbox"
         android:layout_width="343dp"
         android:layout_height="55dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="16dp"
         android:text="I took a food break."
         android:textSize="20sp"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.492"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/dateButton" />
+
+    <Button
+        android:id="@+id/dateButton"
+        android:layout_width="343dp"
+        android:layout_height="107dp"
+        android:layout_marginTop="32dp"
+        android:onClick="onClickDate"
+        android:text="21.11.2011"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/timeButton" />
 
     <TextView
         android:id="@+id/hoursLabel"
@@ -164,5 +139,15 @@
         android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/stampButton"
         app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:layout_marginEnd="24dp"
+        android:text="History"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
