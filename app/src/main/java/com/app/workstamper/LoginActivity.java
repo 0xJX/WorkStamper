@@ -7,12 +7,14 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.app.workstamper.config.Config;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -26,9 +28,12 @@ public class LoginActivity extends AppCompatActivity
             passwordTextField;
     private Button
             loginBtn;
+    private CheckBox
+            rememberMeBtn;
     public static final boolean
             debugSkipLogin = false; // Set this to true, if you want to skip login auth.
 
+    Config config;
     FirebaseAuth mAuth;
 
     @Override
@@ -37,11 +42,24 @@ public class LoginActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
 
+        // Init config and firebase auth.
+        config = new Config(getApplicationContext());
         mAuth = FirebaseAuth.getInstance();
 
+        // Init interface objects.
         emailTextField = findViewById(R.id.emailBox);
         passwordTextField = findViewById(R.id.passwordBox);
         loginBtn = findViewById(R.id.loginButton);
+        rememberMeBtn = findViewById(R.id.rememberUserBox);
+
+        // Try reading config, do nothing if it does not exist.
+        if(config.ReadConfig())
+        {
+            emailTextField.setText(config.GetSavedEmail());
+            passwordTextField.setText(config.GetSavedPassword());
+            loginBtn.setVisibility(View.VISIBLE);
+            rememberMeBtn.setChecked(true);
+        }
 
         passwordTextField.addTextChangedListener(new TextWatcher()
         {
@@ -51,6 +69,7 @@ public class LoginActivity extends AppCompatActivity
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count)
             {
+                // Set login button visible if both of the textboxes have some text.
                 loginBtn.setVisibility((count > 0 && emailTextField.getText().length() > 0) ? View.VISIBLE : View.INVISIBLE);
             }
 
@@ -80,6 +99,13 @@ public class LoginActivity extends AppCompatActivity
                         FirebaseUser user = mAuth.getCurrentUser();
                     }
 
+                    if(rememberMeBtn.isChecked())
+                    {
+                        config.WriteConfig(email, password);
+                    }else
+                    {
+                        config.DeleteConfig();
+                    }
                     startActivity(new Intent(LoginActivity.this, MainActivity.class));
                 }
                 else
