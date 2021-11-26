@@ -1,11 +1,13 @@
 package com.app.workstamper;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -14,10 +16,22 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity
 {
@@ -35,7 +49,12 @@ public class MainActivity extends AppCompatActivity
     private Calendar
             selectedDateTime,
             startDateTime;
+    public String date, time;
+
     FirebaseAuth mAuth;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+    private static final String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -49,6 +68,7 @@ public class MainActivity extends AppCompatActivity
         */
 
         mAuth = FirebaseAuth.getInstance();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         timeBtn = findViewById(R.id.timeButton);
         dateBtn = findViewById(R.id.dateButton);
@@ -101,11 +121,13 @@ public class MainActivity extends AppCompatActivity
             Return time in "0:00" format and add extra zero in front of minutes,
             when minutes are 1 digit.
         */
+        time = c.get(Calendar.HOUR_OF_DAY) + ((c.get(Calendar.MINUTE) < 10) ? ":0" : ":") + c.get(Calendar.MINUTE);
         return c.get(Calendar.HOUR_OF_DAY) + ((c.get(Calendar.MINUTE) < 10) ? ":0" : ":") + c.get(Calendar.MINUTE);
     }
 
     public String dateToStringFormat(Calendar c)
     {
+        date = c.get(Calendar.DAY_OF_MONTH) + "." + c.get(Calendar.MONTH) + "." + c.get(Calendar.YEAR);
         return c.get(Calendar.DAY_OF_MONTH) + "." + c.get(Calendar.MONTH) + "." + c.get(Calendar.YEAR);
     }
 
@@ -164,12 +186,50 @@ public class MainActivity extends AppCompatActivity
 
     public void onClickWork(View view)
     {
+
+    if (!isWorking){
+
+
+        Map<String, Object> stamp = new HashMap<>();
+        stamp.put("started", time);
+        stamp.put("ended", "Still working...");
+
+
+        db.collection(mAuth.getUid()).document(date)
+            .set(stamp)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "DocumentSnapshot successfully written!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error writing document", e);
+                    }
+                });
+
+    }
+
+
+       if (isWorking) {
+           Map<String, Object> stamp = new HashMap<>();
+
+           stamp.put("ended", time);
+
+           db.collection(mAuth.getUid()).document(date)
+                   .set(stamp);
+       }
+
+
         isWorking = !isWorking;
 
         // Copy "selected datetime data" to "start datetime data".
         startDateTime = (Calendar)selectedDateTime.clone();
 
         UpdateView();
+
     }
 
     public void onClickHistory(View view)
