@@ -16,18 +16,11 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -48,8 +41,7 @@ public class MainActivity extends AppCompatActivity
             isWorking = false;
     private Calendar
             selectedDateTime,
-            startDateTime;
-    public String date, time;
+            storedDateTime;
 
     FirebaseAuth mAuth;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -109,8 +101,8 @@ public class MainActivity extends AppCompatActivity
         if(!isWorking)
             return;
 
-        String hoursString = (selectedDateTime.get(Calendar.HOUR_OF_DAY) - startDateTime.get(Calendar.HOUR_OF_DAY)) +
-                "h " + (selectedDateTime.get(Calendar.MINUTE) - startDateTime.get(Calendar.MINUTE)) + "min";
+        String hoursString = (selectedDateTime.get(Calendar.HOUR_OF_DAY) - storedDateTime.get(Calendar.HOUR_OF_DAY)) +
+                "h " + (selectedDateTime.get(Calendar.MINUTE) - storedDateTime.get(Calendar.MINUTE)) + "min";
 
         hoursLbl.setText(hoursString);
     }
@@ -121,13 +113,11 @@ public class MainActivity extends AppCompatActivity
             Return time in "0:00" format and add extra zero in front of minutes,
             when minutes are 1 digit.
         */
-        time = c.get(Calendar.HOUR_OF_DAY) + ((c.get(Calendar.MINUTE) < 10) ? ":0" : ":") + c.get(Calendar.MINUTE);
         return c.get(Calendar.HOUR_OF_DAY) + ((c.get(Calendar.MINUTE) < 10) ? ":0" : ":") + c.get(Calendar.MINUTE);
     }
 
     public String dateToStringFormat(Calendar c)
     {
-        date = c.get(Calendar.DAY_OF_MONTH) + "." + c.get(Calendar.MONTH) + "." + c.get(Calendar.YEAR);
         return c.get(Calendar.DAY_OF_MONTH) + "." + c.get(Calendar.MONTH) + "." + c.get(Calendar.YEAR);
     }
 
@@ -186,50 +176,51 @@ public class MainActivity extends AppCompatActivity
 
     public void onClickWork(View view)
     {
+        isWorking = !isWorking;
 
-    if (!isWorking){
-
+        // Copy "selected datetime data" to "start datetime data".
+        storedDateTime = (Calendar)selectedDateTime.clone();
 
         Map<String, Object> stamp = new HashMap<>();
-        stamp.put("started", time);
-        stamp.put("ended", "Still working...");
+        if (isWorking)
+        {
+            stamp.put("started", timeToStringFormat(storedDateTime));
+            stamp.put("ended", "Still working...");
 
 
-        db.collection(mAuth.getUid()).document(date)
-            .set(stamp)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
+            if(mAuth.getUid() != null)
+            {
+                db.collection(mAuth.getUid()).document(dateToStringFormat(storedDateTime))
+                        .set(stamp).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d(TAG, "DocumentSnapshot successfully written!");
                     }
-                })
-                .addOnFailureListener(new OnFailureListener() {
+                }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error writing document", e);
+                        Log.e(TAG, "Error writing document", e);
                     }
                 });
+            }else
+            {
+                // This can happen as well if LoginActivity.debugSkipLogin is set to true.
+                Log.e(TAG, "Database collection failed: Authentication was null.");
+            }
+        }
+        else
+        {
+            stamp.put("ended", timeToStringFormat(storedDateTime));
 
-    }
-
-
-       if (isWorking) {
-           Map<String, Object> stamp = new HashMap<>();
-
-           stamp.put("ended", time);
-
-           db.collection(mAuth.getUid()).document(date)
-                   .set(stamp);
-       }
-
-
-        isWorking = !isWorking;
-
-        // Copy "selected datetime data" to "start datetime data".
-        startDateTime = (Calendar)selectedDateTime.clone();
-
+            if(mAuth.getUid() != null)
+            {
+                db.collection(mAuth.getUid()).document(dateToStringFormat(storedDateTime)).set(stamp);
+            }else
+            {
+                Log.e(TAG, "Database collection failed: Authentication was null.");
+            }
+        }
         UpdateView();
-
     }
 
     public void onClickHistory(View view)
