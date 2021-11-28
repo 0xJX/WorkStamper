@@ -16,11 +16,16 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -36,7 +41,9 @@ public class MainActivity extends AppCompatActivity
     private CheckBox
             foodBreakBox;
     private TextView
-            hoursLbl;
+            hoursLbl,
+            LoggedUser,
+            LoggedOrg;
     private boolean
             isWorking = false;
     private Calendar
@@ -44,7 +51,9 @@ public class MainActivity extends AppCompatActivity
             storedDateTime;
 
     FirebaseAuth mAuth;
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    FirebaseFirestore db;
+
+    public String userFname, userLname, userOrg;
 
     private static final String TAG = "MainActivity";
 
@@ -54,19 +63,20 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        /*
-           Bundle extras = getIntent().getExtras();
-           String companyID = extras.getString("CompanyID");
-        */
 
         mAuth = FirebaseAuth.getInstance();
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db = FirebaseFirestore.getInstance();
 
         timeBtn = findViewById(R.id.timeButton);
         dateBtn = findViewById(R.id.dateButton);
         stampBtn = findViewById(R.id.stampButton);
         hoursLbl = findViewById(R.id.hoursLabel);
         foodBreakBox = findViewById(R.id.fbreakCheckbox);
+
+        LoggedUser = findViewById(R.id.LoggedUser);
+        LoggedOrg = findViewById(R.id.Organization);
+
+
         UpdateView();
     }
 
@@ -81,6 +91,28 @@ public class MainActivity extends AppCompatActivity
         {
             startActivity(new Intent(MainActivity.this, LoginActivity.class));
         }
+
+
+        DocumentReference docRef = db.collection("users").document(mAuth.getUid());
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    userFname = document.getString("firstname: ");
+                    userLname = document.getString("lastname: ");
+                    userOrg = document.getString("organization: ");
+                    if (document.exists()) {
+                        Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                    } else {
+                        Log.d(TAG, "No such document");
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                }
+            }
+        });
+
     }
 
     void UpdateView()
@@ -93,6 +125,10 @@ public class MainActivity extends AppCompatActivity
         stampBtn.setText(this.isWorking ? "Stop work" : "Start work");
         hoursLbl.setVisibility(this.isWorking ? View.VISIBLE : View.INVISIBLE);
         foodBreakBox.setVisibility(this.isWorking ? View.VISIBLE : View.INVISIBLE);
+
+        LoggedUser.setText(userFname + " " + userLname);
+        LoggedOrg.setText(userOrg);
+
         UpdateWorkingHours();
     }
 
@@ -182,12 +218,14 @@ public class MainActivity extends AppCompatActivity
         storedDateTime = (Calendar)selectedDateTime.clone();
 
         Map<String, Object> stamp = new HashMap<>();
+        stamp.put("started", timeToStringFormat(storedDateTime));
+        stamp.put("started", "Still working...");
+
+        Map<String, Object> update = new HashMap<>();
+        update.put("ended", timeToStringFormat(storedDateTime));
+
         if (isWorking)
         {
-            stamp.put("started", timeToStringFormat(storedDateTime));
-            stamp.put("ended", "Still working...");
-
-
             if(mAuth.getUid() != null)
             {
                 db.collection(mAuth.getUid()).document(dateToStringFormat(storedDateTime))
@@ -202,7 +240,9 @@ public class MainActivity extends AppCompatActivity
                         Log.e(TAG, "Error writing document", e);
                     }
                 });
-            }else
+            }
+
+            else
             {
                 // This can happen as well if LoginActivity.debugSkipLogin is set to true.
                 Log.e(TAG, "Database collection failed: Authentication was null.");
@@ -210,12 +250,13 @@ public class MainActivity extends AppCompatActivity
         }
         else
         {
-            stamp.put("ended", timeToStringFormat(storedDateTime));
-
             if(mAuth.getUid() != null)
             {
-                db.collection(mAuth.getUid()).document(dateToStringFormat(storedDateTime)).set(stamp);
-            }else
+                db.collection(mAuth.getUid())
+                        .document(dateToStringFormat(storedDateTime))
+                        .set(update, SetOptions.merge());
+            }
+            else
             {
                 Log.e(TAG, "Database collection failed: Authentication was null.");
             }
