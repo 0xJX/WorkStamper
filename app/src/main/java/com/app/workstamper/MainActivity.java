@@ -4,11 +4,15 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -32,8 +36,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity
-{
+public class MainActivity extends AppCompatActivity {
     private Button
             timeBtn,
             dateBtn,
@@ -61,8 +64,7 @@ public class MainActivity extends AppCompatActivity
     private static final String TAG = "MainActivity";
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -86,21 +88,68 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onStart()
-    {
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        switch (id) {
+            case R.id.history:
+                startActivity(new Intent(MainActivity.this, HistoryActivity.class));
+                break;
+
+            case R.id.settings:
+                Toast.makeText(this, "Settings clicked, no actions configured.", Toast.LENGTH_LONG).show();
+                break;
+
+            case R.id.logout:
+                //Toast.makeText(this, "Logout clicked", Toast.LENGTH_LONG).show(); //For debugging purposes
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle("Logout");
+                builder.setMessage("Press OK to logout");
+                builder.setCancelable(false);
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        mAuth.signOut();
+                        startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                    }
+                });
+
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        return;
+                    }
+                });
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
+
+                break;
+        }
+
+        return true;
+    }
+
+
+    @Override
+    protected void onStart() {
         super.onStart();
 
         // User was null, return back to login. (unless debugSkipLogin is set to true)
-        if (mAuth.getCurrentUser() == null && !LoginActivity.debugSkipLogin)
-        {
+        if (mAuth.getCurrentUser() == null && !LoginActivity.debugSkipLogin) {
             startActivity(new Intent(MainActivity.this, LoginActivity.class));
         }
     }
 
-    void UpdateStoredUserData()
-    {
-        if(mAuth.getUid() == null)
-        {
+    void UpdateStoredUserData() {
+        if (mAuth.getUid() == null) {
             Log.e(TAG, "Unable to get stored userdata, authentication was null.");
             return;
         }
@@ -109,14 +158,11 @@ public class MainActivity extends AppCompatActivity
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @SuppressLint("SetTextI18n")
             @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task)
-            {
-                if (task.isSuccessful())
-                {
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
                     DocumentSnapshot document = task.getResult();
 
-                    if (document != null && document.exists())
-                    {
+                    if (document != null && document.exists()) {
                         storedUsername = document.getString("firstname");
                         storedLastname = document.getString("lastname");
                         storedOrganization = document.getString("organization");
@@ -135,8 +181,7 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    void UpdateView()
-    {
+    void UpdateView() {
         // Get Current Time
         selectedDateTime = Calendar.getInstance();
 
@@ -149,9 +194,8 @@ public class MainActivity extends AppCompatActivity
         UpdateWorkingHours();
     }
 
-    void UpdateWorkingHours()
-    {
-        if(!isWorking)
+    void UpdateWorkingHours() {
+        if (!isWorking)
             return;
 
         String hoursString = (selectedDateTime.get(Calendar.HOUR_OF_DAY) - storedDateTime.get(Calendar.HOUR_OF_DAY)) +
@@ -160,8 +204,7 @@ public class MainActivity extends AppCompatActivity
         hoursLbl.setText(hoursString);
     }
 
-    public String timeToStringFormat(Calendar c)
-    {
+    public String timeToStringFormat(Calendar c) {
         /*
             Return time in "0:00" format and add extra zero in front of minutes,
             when minutes are 1 digit.
@@ -169,25 +212,20 @@ public class MainActivity extends AppCompatActivity
         return c.get(Calendar.HOUR_OF_DAY) + ((c.get(Calendar.MINUTE) < 10) ? ":0" : ":") + c.get(Calendar.MINUTE);
     }
 
-    public String dateToStringFormat(Calendar c)
-    {
+    public String dateToStringFormat(Calendar c) {
         return c.get(Calendar.DAY_OF_MONTH) + "." + c.get(Calendar.MONTH) + "." + c.get(Calendar.YEAR);
     }
 
-    public void onClickTime(View view)
-    {
+    public void onClickTime(View view) {
         Calendar c = Calendar.getInstance();
         int iHours = c.get(Calendar.HOUR_OF_DAY), iMinutes = c.get(Calendar.MINUTE);
 
         // Launch TimePicker Dialog
-        TimePickerDialog timePickerDialog = new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener()
-        {
+        TimePickerDialog timePickerDialog = new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
             @Override
-            public void onTimeSet(TimePicker view, int hours, int minutes)
-            {
-                if(hours >= iHours && minutes > iMinutes || hours > iHours)
-                {
-                    Toast.makeText(getApplicationContext(),"Can't set time to future.", Toast.LENGTH_SHORT).show();
+            public void onTimeSet(TimePicker view, int hours, int minutes) {
+                if (hours >= iHours && minutes > iMinutes || hours > iHours) {
+                    Toast.makeText(getApplicationContext(), "Can't set time to future.", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -202,20 +240,16 @@ public class MainActivity extends AppCompatActivity
         timePickerDialog.show();
     }
 
-    public void onClickDate(View view)
-    {
+    public void onClickDate(View view) {
         Calendar c = Calendar.getInstance();
         int iYear = c.get(Calendar.YEAR), iMonth = c.get(Calendar.MONTH), iDay = c.get(Calendar.DAY_OF_MONTH);
 
         // Launch DatePicker Dialog
-        DatePickerDialog datePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener()
-        {
+        DatePickerDialog datePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
             @Override
-            public void onDateSet(DatePicker view, int year, int month, int day)
-            {
-                if(year > iYear || year >= iYear && month > iMonth || year >= iYear && month >= iMonth && day > iDay)
-                {
-                    Toast.makeText(getApplicationContext(),"Can't set date to future.", Toast.LENGTH_SHORT).show();
+            public void onDateSet(DatePicker view, int year, int month, int day) {
+                if (year > iYear || year >= iYear && month > iMonth || year >= iYear && month >= iMonth && day > iDay) {
+                    Toast.makeText(getApplicationContext(), "Can't set date to future.", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 selectedDateTime.set(Calendar.YEAR, year);
@@ -227,18 +261,16 @@ public class MainActivity extends AppCompatActivity
         datePickerDialog.show();
     }
 
-    public void onClickWork(View view)
-    {
+    public void onClickWork(View view) {
         isWorking = !isWorking;
 
         // Copy "selected datetime data" to "start datetime data".
-        storedDateTime = (Calendar)selectedDateTime.clone();
+        storedDateTime = (Calendar) selectedDateTime.clone();
 
         // Update UI
         UpdateView();
 
-        if(mAuth.getUid() == null)
-        {
+        if (mAuth.getUid() == null) {
             // This can happen as well if LoginActivity.debugSkipLogin is set to true.
             Log.e(TAG, "Database collection failed: Authentication was null.");
             return;
@@ -248,8 +280,7 @@ public class MainActivity extends AppCompatActivity
 
         Map<String, String> stamp = new HashMap<>();
 
-        if (isWorking)
-        {
+        if (isWorking) {
             /* TODO: Check if stamp exists already for selected date and inform user
                      to edit it via history instead. */
 
@@ -266,24 +297,11 @@ public class MainActivity extends AppCompatActivity
                     Log.e(TAG, "Error writing StartTime: ", e);
                 }
             });
-        }
-        else
-        {
+        } else {
             stamp.put("EndTime", timeToStringFormat(storedDateTime));
             db.collection(mAuth.getUid())
                     .document(dateToStringFormat(storedDateTime))
                     .set(stamp, SetOptions.merge());
         }
-    }
-
-    public void onClickHistory(View view)
-    {
-        startActivity(new Intent(MainActivity.this, HistoryActivity.class));
-    }
-
-    public void onClickLogout(View view)
-    {
-        mAuth.signOut();
-        startActivity(new Intent(MainActivity.this, LoginActivity.class));
     }
 }
