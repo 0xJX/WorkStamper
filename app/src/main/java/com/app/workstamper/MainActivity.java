@@ -3,6 +3,7 @@ package com.app.workstamper;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
@@ -42,18 +43,20 @@ public class MainActivity extends AppCompatActivity
             foodBreakBox;
     private TextView
             hoursLbl,
-            LoggedUser,
-            LoggedOrg;
+            loggedUserLbl,
+            loggedOrgLbl;
     private boolean
             isWorking = false;
     private Calendar
             selectedDateTime,
             storedDateTime;
+    private String
+            storedUsername,
+            storedLastname,
+            storedOrganization;
 
     FirebaseAuth mAuth;
     FirebaseFirestore db;
-
-    public String userFname, userLname, userOrg;
 
     private static final String TAG = "MainActivity";
 
@@ -62,7 +65,6 @@ public class MainActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
 
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
@@ -73,10 +75,13 @@ public class MainActivity extends AppCompatActivity
         hoursLbl = findViewById(R.id.hoursLabel);
         foodBreakBox = findViewById(R.id.fbreakCheckbox);
 
-        LoggedUser = findViewById(R.id.LoggedUser);
-        LoggedOrg = findViewById(R.id.Organization);
+        loggedUserLbl = findViewById(R.id.LoggedUser);
+        loggedOrgLbl = findViewById(R.id.Organization);
 
+        // Fetch user related strings from database.
+        UpdateStoredUserData();
 
+        // Update UI.
         UpdateView();
     }
 
@@ -84,35 +89,50 @@ public class MainActivity extends AppCompatActivity
     protected void onStart()
     {
         super.onStart();
-        FirebaseUser user = mAuth.getCurrentUser();
 
         // User was null, return back to login. (unless debugSkipLogin is set to true)
-        if (user == null && !LoginActivity.debugSkipLogin)
+        if (mAuth.getCurrentUser() == null && !LoginActivity.debugSkipLogin)
         {
             startActivity(new Intent(MainActivity.this, LoginActivity.class));
         }
+    }
 
+    void UpdateStoredUserData()
+    {
+        if(mAuth.getUid() == null)
+        {
+            Log.e(TAG, "Unable to get stored userdata, authentication was null.");
+            return;
+        }
 
         DocumentReference docRef = db.collection("users").document(mAuth.getUid());
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @SuppressLint("SetTextI18n")
             @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
+            public void onComplete(@NonNull Task<DocumentSnapshot> task)
+            {
+                if (task.isSuccessful())
+                {
                     DocumentSnapshot document = task.getResult();
-                    userFname = document.getString("firstname: ");
-                    userLname = document.getString("lastname: ");
-                    userOrg = document.getString("organization: ");
-                    if (document.exists()) {
+
+                    if (document != null && document.exists())
+                    {
+                        storedUsername = document.getString("firstname");
+                        storedLastname = document.getString("lastname");
+                        storedOrganization = document.getString("organization");
+
+                        loggedUserLbl.setText(storedUsername + " " + storedLastname);
+                        loggedOrgLbl.setText(storedOrganization);
+
                         Log.d(TAG, "DocumentSnapshot data: " + document.getData());
                     } else {
-                        Log.d(TAG, "No such document");
+                        Log.e(TAG, "No such document");
                     }
                 } else {
-                    Log.d(TAG, "get failed with ", task.getException());
+                    Log.e(TAG, "get failed with ", task.getException());
                 }
             }
         });
-
     }
 
     void UpdateView()
@@ -125,9 +145,6 @@ public class MainActivity extends AppCompatActivity
         stampBtn.setText(this.isWorking ? "Stop work" : "Start work");
         hoursLbl.setVisibility(this.isWorking ? View.VISIBLE : View.INVISIBLE);
         foodBreakBox.setVisibility(this.isWorking ? View.VISIBLE : View.INVISIBLE);
-
-        LoggedUser.setText(userFname + " " + userLname);
-        LoggedOrg.setText(userOrg);
 
         UpdateWorkingHours();
     }
@@ -217,51 +234,46 @@ public class MainActivity extends AppCompatActivity
         // Copy "selected datetime data" to "start datetime data".
         storedDateTime = (Calendar)selectedDateTime.clone();
 
-        Map<String, Object> stamp = new HashMap<>();
-        stamp.put("started", timeToStringFormat(storedDateTime));
-        stamp.put("started", "Still working...");
+        // Update UI
+        UpdateView();
 
-        Map<String, Object> update = new HashMap<>();
-        update.put("ended", timeToStringFormat(storedDateTime));
+        if(mAuth.getUid() == null)
+        {
+            // This can happen as well if LoginActivity.debugSkipLogin is set to true.
+            Log.e(TAG, "Database collection failed: Authentication was null.");
+            return;
+        }
+
+        // Send stamp data to database.
+
+        Map<String, String> stamp = new HashMap<>();
 
         if (isWorking)
         {
-            if(mAuth.getUid() != null)
-            {
-                db.collection(mAuth.getUid()).document(dateToStringFormat(storedDateTime))
-                        .set(stamp).addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "DocumentSnapshot successfully written!");
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "Error writing document", e);
-                    }
-                });
-            }
+            /* TODO: Check if stamp exists already for selected date and inform user
+                     to edit it via history instead. */
 
-            else
-            {
-                // This can happen as well if LoginActivity.debugSkipLogin is set to true.
-                Log.e(TAG, "Database collection failed: Authentication was null.");
-            }
+            stamp.put("StartTime", timeToStringFormat(storedDateTime));
+            db.collection(mAuth.getUid()).document(dateToStringFormat(storedDateTime))
+                    .set(stamp).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    Log.d(TAG, "StartTime successfully written!");
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.e(TAG, "Error writing StartTime: ", e);
+                }
+            });
         }
         else
         {
-            if(mAuth.getUid() != null)
-            {
-                db.collection(mAuth.getUid())
-                        .document(dateToStringFormat(storedDateTime))
-                        .set(update, SetOptions.merge());
-            }
-            else
-            {
-                Log.e(TAG, "Database collection failed: Authentication was null.");
-            }
+            stamp.put("EndTime", timeToStringFormat(storedDateTime));
+            db.collection(mAuth.getUid())
+                    .document(dateToStringFormat(storedDateTime))
+                    .set(stamp, SetOptions.merge());
         }
-        UpdateView();
     }
 
     public void onClickHistory(View view)
