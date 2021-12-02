@@ -58,8 +58,8 @@ public class MainActivity extends AppCompatActivity {
             storedLastname,
             storedOrganization;
 
-    FirebaseAuth mAuth;
-    FirebaseFirestore db;
+    static FirebaseAuth mAuth;
+    static FirebaseFirestore db;
 
     private static final String TAG = "MainActivity";
 
@@ -154,11 +154,34 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        // Get work status
+        if(Stamper.Database.IsCurrentlyWorking())
+        {
+            DocumentSnapshot document = Stamper.Database.GetLatestDocument();
+            if (document != null && document.exists())
+            {
+                String hadFoodBreak = document.getString("HadFoodBreak");
+                String startTime = document.getString("StartTime");
+                String startDate = document.getString("StartDate");
+
+                if(hadFoodBreak != null && startTime != null && startDate != null)
+                {
+                    Stamper.StampData stampData = new Stamper.StampData(startDate, startTime, hadFoodBreak.contains("true"));
+                    storedDateTime = stampData.startDateTime;
+                    isWorking = true;
+                    UpdateView();
+                }
+            }
+        }
+
+
+        // Get names and organization.
         DocumentReference docRef = db.collection("users").document(mAuth.getUid());
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @SuppressLint("SetTextI18n")
             @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+            public void onComplete(@NonNull Task<DocumentSnapshot> task)
+            {
                 if (task.isSuccessful()) {
                     DocumentSnapshot document = task.getResult();
 
@@ -175,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
                         Log.e(TAG, "No such document");
                     }
                 } else {
-                    Log.e(TAG, "get failed with ", task.getException());
+                    Log.e(TAG, "Get failed: ", task.getException());
                 }
             }
         });
@@ -185,8 +208,8 @@ public class MainActivity extends AppCompatActivity {
         // Get Current Time
         selectedDateTime = Calendar.getInstance();
 
-        timeBtn.setText(timeToStringFormat(selectedDateTime));
-        dateBtn.setText(dateToStringFormat(selectedDateTime));
+        timeBtn.setText(DatetimeHelper.Time.toStringFormat(selectedDateTime));
+        dateBtn.setText(DatetimeHelper.Date.toStringFormat(selectedDateTime));
         stampBtn.setText(this.isWorking ? "Stop work" : "Start work");
         hoursLbl.setVisibility(this.isWorking ? View.VISIBLE : View.INVISIBLE);
         foodBreakBox.setVisibility(this.isWorking ? View.VISIBLE : View.INVISIBLE);
@@ -202,18 +225,6 @@ public class MainActivity extends AppCompatActivity {
                 "h " + (selectedDateTime.get(Calendar.MINUTE) - storedDateTime.get(Calendar.MINUTE)) + "min";
 
         hoursLbl.setText(hoursString);
-    }
-
-    public String timeToStringFormat(Calendar c) {
-        /*
-            Return time in "0:00" format and add extra zero in front of minutes,
-            when minutes are 1 digit.
-        */
-        return c.get(Calendar.HOUR_OF_DAY) + ((c.get(Calendar.MINUTE) < 10) ? ":0" : ":") + c.get(Calendar.MINUTE);
-    }
-
-    public String dateToStringFormat(Calendar c) {
-        return c.get(Calendar.DAY_OF_MONTH) + "." + c.get(Calendar.MONTH) + "." + c.get(Calendar.YEAR);
     }
 
     public void onClickTime(View view) {
@@ -233,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
 
                 selectedDateTime.set(Calendar.HOUR_OF_DAY, hours);
                 selectedDateTime.set(Calendar.MINUTE, minutes);
-                timeBtn.setText(timeToStringFormat(selectedDateTime));
+                timeBtn.setText(DatetimeHelper.Time.toStringFormat(selectedDateTime));
                 UpdateWorkingHours();
             }
         }, iHours, iMinutes, true);
@@ -255,13 +266,14 @@ public class MainActivity extends AppCompatActivity {
                 selectedDateTime.set(Calendar.YEAR, year);
                 selectedDateTime.set(Calendar.MONTH, month);
                 selectedDateTime.set(Calendar.DAY_OF_MONTH, day);
-                dateBtn.setText(dateToStringFormat(selectedDateTime));
+                dateBtn.setText(DatetimeHelper.Date.toStringFormat(selectedDateTime));
             }
         }, iYear, iMonth, iDay);
         datePickerDialog.show();
     }
 
-    public void onClickWork(View view) {
+    public void onClickWork(View view)
+    {
         isWorking = !isWorking;
 
         // Copy "selected datetime data" to "start datetime data".
@@ -276,32 +288,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // Send stamp data to database.
-
-        Map<String, String> stamp = new HashMap<>();
-
-        if (isWorking) {
-            /* TODO: Check if stamp exists already for selected date and inform user
-                     to edit it via history instead. */
-
-            stamp.put("StartTime", timeToStringFormat(storedDateTime));
-            db.collection(mAuth.getUid()).document(dateToStringFormat(storedDateTime))
-                    .set(stamp).addOnSuccessListener(new OnSuccessListener<Void>() {
-                @Override
-                public void onSuccess(Void aVoid) {
-                    Log.d(TAG, "StartTime successfully written!");
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Log.e(TAG, "Error writing StartTime: ", e);
-                }
-            });
-        } else {
-            stamp.put("EndTime", timeToStringFormat(storedDateTime));
-            db.collection(mAuth.getUid())
-                    .document(dateToStringFormat(storedDateTime))
-                    .set(stamp, SetOptions.merge());
-        }
+        // Writes data to database, sets "StartDateTime" if isWorking is true.
+        Stamper.Database.WriteStamp(storedDateTime, foodBreakBox.isChecked(), isWorking);
     }
 }
