@@ -217,12 +217,12 @@ public class MainActivity extends AppCompatActivity {
 
     public void onClickTime(View view)
     {
-        DatetimeHelper.Time.pickerDialog(timeBtn.getContext(), timeBtn, selectedDateTime, true);
+        DatetimeHelper.Time.pickerDialog(timeBtn, selectedDateTime, true);
     }
 
     public void onClickDate(View view)
     {
-        DatetimeHelper.Date.pickerDialog(dateBtn.getContext(), dateBtn, selectedDateTime, true);
+        DatetimeHelper.Date.pickerDialog(dateBtn, selectedDateTime, true);
     }
 
     public void onClickWork(View view)

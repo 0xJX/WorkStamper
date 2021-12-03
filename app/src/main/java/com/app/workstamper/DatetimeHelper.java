@@ -23,7 +23,7 @@ public class DatetimeHelper
             return c.get(Calendar.HOUR_OF_DAY) + ((c.get(Calendar.MINUTE) < 10) ? ":0" : ":") + c.get(Calendar.MINUTE);
         }
 
-        public static void pickerDialog(Context context, Button button, Calendar c, boolean getLatestTime)
+        public static void pickerDialog(Button button, Calendar c, boolean getLatestTime)
         {
             Calendar temp = getLatestTime ? Calendar.getInstance() : (Calendar)c.clone();
 
@@ -34,7 +34,7 @@ public class DatetimeHelper
                 latestDay = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
 
             // Launch TimePicker Dialog
-            TimePickerDialog timePickerDialog = new TimePickerDialog(context, new TimePickerDialog.OnTimeSetListener() {
+            TimePickerDialog timePickerDialog = new TimePickerDialog(button.getContext(), new TimePickerDialog.OnTimeSetListener() {
                 @Override
                 public void onTimeSet(TimePicker view, int hours, int minutes)
                 {
@@ -45,7 +45,7 @@ public class DatetimeHelper
                         if(c.get(Calendar.YEAR) >= latestYear && (c.get(Calendar.YEAR) >= latestYear && c.get(Calendar.MONTH) >= latestMonth)
                                 && (c.get(Calendar.YEAR) >= latestYear && c.get(Calendar.MONTH) >= latestMonth && c.get(Calendar.DAY_OF_MONTH) >= latestDay))
                         {
-                            Toast.makeText(context, "Can't set time to future.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(button.getContext(), "Can't set time to future.", Toast.LENGTH_SHORT).show();
                             return;
                         }
                     }
@@ -66,7 +66,7 @@ public class DatetimeHelper
             return c.get(Calendar.DAY_OF_MONTH) + "." + c.get(Calendar.MONTH) + "." + c.get(Calendar.YEAR);
         }
 
-        public static void pickerDialog(Context context, Button button, Calendar c, boolean getLatestDate)
+        public static void pickerDialog(Button button, Calendar c, boolean getLatestDate)
         {
             Calendar temp = getLatestDate ? Calendar.getInstance() : (Calendar)c.clone();
 
@@ -77,14 +77,14 @@ public class DatetimeHelper
                 latestMinutes = Calendar.getInstance().get(Calendar.MINUTE);
 
             // Launch DatePicker Dialog
-            DatePickerDialog datePickerDialog = new DatePickerDialog(context, new DatePickerDialog.OnDateSetListener() {
+            DatePickerDialog datePickerDialog = new DatePickerDialog(button.getContext(), new DatePickerDialog.OnDateSetListener() {
                 @Override
                 public void onDateSet(DatePicker view, int year, int month, int day)
                 {
                     // Check that current date isn't set to future and prevent setting it.
                     if (year > latestYear || year >= latestYear && month > latestMonth || year >= latestYear && month >= latestMonth && day > latestDay)
                     {
-                        Toast.makeText(context, "Can't set date to future.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(button.getContext(), "Can't set date to future.", Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -93,7 +93,7 @@ public class DatetimeHelper
                             && (c.get(Calendar.YEAR) >= latestYear && c.get(Calendar.MONTH) >= latestMonth && c.get(Calendar.DAY_OF_MONTH) >= latestDay)
                             && (c.get(Calendar.HOUR_OF_DAY) >= latestHours && c.get(Calendar.MINUTE) > latestMinutes) || (c.get(Calendar.HOUR_OF_DAY) > latestHours))
                     {
-                        Toast.makeText(context, "Can't set date: Time is set too high with this date.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(button.getContext(), "Can't set date: Time is set too high with this date.", Toast.LENGTH_LONG).show();
                         return;
                     }
                     c.set(Calendar.YEAR, year);

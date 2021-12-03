@@ -42,16 +42,16 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
         holder.foodBreakCheckBox.setChecked(stampData.get(pos).hadFoodBreak);
 
         holder.startTimeButton.setOnClickListener(v ->
-                DatetimeHelper.Time.pickerDialog(holder.startTimeButton.getContext(), holder.startTimeButton, stampData.get(pos).startDateTime, false));
+                DatetimeHelper.Time.pickerDialog(holder.startTimeButton, stampData.get(pos).startDateTime, false));
 
         holder.startDateButton.setOnClickListener(v ->
-                DatetimeHelper.Date.pickerDialog(holder.startDateButton.getContext(), holder.startDateButton, stampData.get(pos).startDateTime, false));
+                DatetimeHelper.Date.pickerDialog(holder.startDateButton, stampData.get(pos).startDateTime, false));
 
         holder.endTimeButton.setOnClickListener(v ->
-                DatetimeHelper.Time.pickerDialog(holder.endTimeButton.getContext(), holder.endTimeButton, stampData.get(pos).endDateTime, false));
+                DatetimeHelper.Time.pickerDialog(holder.endTimeButton, stampData.get(pos).endDateTime, false));
 
         holder.endDateButton.setOnClickListener(v ->
-                DatetimeHelper.Date.pickerDialog(holder.endDateButton.getContext(), holder.endDateButton, stampData.get(pos).endDateTime, false));
+                DatetimeHelper.Date.pickerDialog(holder.endDateButton, stampData.get(pos).endDateTime, false));
 
         holder.foodBreakCheckBox.setOnCheckedChangeListener((buttonView, isChecked) ->
                 stampData.get(pos).hadFoodBreak = isChecked);
