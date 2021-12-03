@@ -13,90 +13,123 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+            <Button
+                android:id="@+id/endDateBtn"
+                android:layout_width="124dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="2dp"
+                android:text="21.10.2021"
+                app:layout_constraintStart_toEndOf="@+id/startDateBtn"
+                app:layout_constraintTop_toBottomOf="@+id/startTimeLbl2" />
+
+            <Button
+                android:id="@+id/startDateBtn"
+                android:layout_width="124dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="2dp"
+                android:text="21.10.2021"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/startTimeLbl" />
+
             <ImageView
                 android:id="@+id/removeBtn"
                 android:layout_width="28dp"
                 android:layout_height="29dp"
                 android:layout_marginTop="4dp"
                 android:layout_marginEnd="4dp"
+                android:clickable="true"
+                android:hapticFeedbackEnabled="true"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@android:drawable/ic_delete" />
 
             <TextView
-                android:id="@+id/dateLabel"
+                android:id="@+id/stampIdLbl"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="72dp"
                 android:layout_marginTop="4dp"
-                android:text="30.10.2021"
-                android:textSize="24sp"
-                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginEnd="9dp"
+                android:text="ID: Stamp_aXfk91as"
+                android:textSize="10sp"
+                app:layout_constraintEnd_toStartOf="@+id/removeBtn"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/divideLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="12dp"
+                android:layout_width="12dp"
+                android:layout_height="27dp"
+                android:layout_marginStart="6dp"
+                android:layout_marginTop="64dp"
                 android:text="-"
+                android:textAlignment="center"
                 android:textSize="20sp"
-                app:layout_constraintStart_toEndOf="@+id/startTimeBtn"
-                app:layout_constraintTop_toBottomOf="@+id/startTimeLbl" />
+                app:layout_constraintStart_toEndOf="@+id/startDateBtn"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/startTimeLbl2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="68dp"
-                android:layout_marginTop="12dp"
+                android:layout_marginStart="100dp"
+                android:layout_marginTop="4dp"
                 android:text="Ended:"
                 android:textSize="16sp"
                 app:layout_constraintStart_toEndOf="@+id/startTimeLbl"
-                app:layout_constraintTop_toBottomOf="@+id/dateLabel" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <Button
                 android:id="@+id/endTimeBtn"
-                android:layout_width="100dp"
+                android:layout_width="124dp"
                 android:layout_height="48dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="1dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="8dp"
                 android:text="16:00"
-                app:layout_constraintStart_toEndOf="@+id/divideLabel"
-                app:layout_constraintTop_toBottomOf="@+id/startTimeLbl2" />
+                app:layout_constraintStart_toEndOf="@+id/startTimeBtn"
+                app:layout_constraintTop_toBottomOf="@+id/endDateBtn" />
 
             <TextView
                 android:id="@+id/startTimeLbl"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="44dp"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="4dp"
                 android:text="Started:"
                 android:textSize="16sp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/dateLabel" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <Button
                 android:id="@+id/startTimeBtn"
-                android:layout_width="100dp"
+                android:layout_width="124dp"
                 android:layout_height="48dp"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="1dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
                 android:text="8:00"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/startTimeLbl" />
+                app:layout_constraintTop_toBottomOf="@+id/startDateBtn" />
 
             <CheckBox
                 android:id="@+id/foodBreakBox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="1dp"
+                android:layout_marginTop="48dp"
+                android:layout_marginEnd="5dp"
                 android:text="Foodbreak"
                 android:textSize="16sp"
-                app:layout_constraintStart_toEndOf="@+id/endTimeBtn"
-                app:layout_constraintTop_toBottomOf="@+id/startTimeLbl2" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/hoursLbl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="5dp"
+                android:text="1h 0min"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/foodBreakBox" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 

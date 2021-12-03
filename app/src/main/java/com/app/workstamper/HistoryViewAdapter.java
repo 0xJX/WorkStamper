@@ -5,7 +5,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -35,16 +34,24 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
     public void onBindViewHolder(@NonNull ViewHolder holder, int position)
     {
         int pos = holder.getAdapterPosition();
-        holder.dateLabel.setText(DatetimeHelper.Date.toStringFormat(stampData.get(pos).startDateTime));
+        holder.startDateButton.setText(DatetimeHelper.Date.toStringFormat(stampData.get(pos).startDateTime));
         holder.startTimeButton.setText(DatetimeHelper.Time.toStringFormat(stampData.get(pos).startDateTime));
         holder.endTimeButton.setText(DatetimeHelper.Time.toStringFormat(stampData.get(pos).endDateTime));
+        holder.endDateButton.setText(DatetimeHelper.Date.toStringFormat(stampData.get(pos).endDateTime));
+        holder.idLabel.setText(stampData.get(pos).id);
         holder.foodBreakCheckBox.setChecked(stampData.get(pos).hadFoodBreak);
 
         holder.startTimeButton.setOnClickListener(v ->
-                DatetimeHelper.Time.timePickerDialog(holder.startTimeButton.getContext(), holder.startTimeButton, stampData.get(pos).startDateTime, false));
+                DatetimeHelper.Time.pickerDialog(holder.startTimeButton.getContext(), holder.startTimeButton, stampData.get(pos).startDateTime, false));
+
+        holder.startDateButton.setOnClickListener(v ->
+                DatetimeHelper.Date.pickerDialog(holder.startDateButton.getContext(), holder.startDateButton, stampData.get(pos).startDateTime, false));
 
         holder.endTimeButton.setOnClickListener(v ->
-                DatetimeHelper.Time.timePickerDialog(holder.endTimeButton.getContext(), holder.endTimeButton, stampData.get(pos).endDateTime, false));
+                DatetimeHelper.Time.pickerDialog(holder.endTimeButton.getContext(), holder.endTimeButton, stampData.get(pos).endDateTime, false));
+
+        holder.endDateButton.setOnClickListener(v ->
+                DatetimeHelper.Date.pickerDialog(holder.endDateButton.getContext(), holder.endDateButton, stampData.get(pos).endDateTime, false));
 
         holder.foodBreakCheckBox.setOnCheckedChangeListener((buttonView, isChecked) ->
                 stampData.get(pos).hadFoodBreak = isChecked);
@@ -71,10 +78,13 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
     public static class ViewHolder extends RecyclerView.ViewHolder
     {
         TextView
-            dateLabel;
+            idLabel,
+            hoursLabel;
         Button
             startTimeButton,
-            endTimeButton;
+            startDateButton,
+            endTimeButton,
+            endDateButton;
         CheckBox
             foodBreakCheckBox;
         ImageView
@@ -87,9 +97,13 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
             super(view);
             rootView = view;
 
-            dateLabel = view.findViewById(R.id.dateLabel);
+            hoursLabel = view.findViewById(R.id.hoursLbl);
+            idLabel = view.findViewById(R.id.stampIdLbl);
+
             startTimeButton = view.findViewById(R.id.startTimeBtn);
+            startDateButton = view.findViewById(R.id.startDateBtn);
             endTimeButton = view.findViewById(R.id.endTimeBtn);
+            endDateButton = view.findViewById(R.id.endDateBtn);
             foodBreakCheckBox = view.findViewById(R.id.foodBreakBox);
             deleteButton = view.findViewById(R.id.removeBtn);
         }

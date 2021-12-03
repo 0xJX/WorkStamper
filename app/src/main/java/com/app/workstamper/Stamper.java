@@ -1,6 +1,5 @@
 package com.app.workstamper;
 
-import static com.app.workstamper.MainActivity.db;
 import static com.app.workstamper.MainActivity.mAuth;
 
 import android.util.Log;
@@ -9,6 +8,7 @@ import androidx.annotation.NonNull;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 import java.security.SecureRandom;
@@ -25,10 +25,12 @@ public class Stamper
     public static class StampData
     {
         public Calendar
-                startDateTime = Calendar.getInstance(),
-                endDateTime = Calendar.getInstance();
+                startDateTime,
+                endDateTime;
         public boolean
                 hadFoodBreak = false;
+        public String
+                id = "ID_NOT_SET";
 
         public Calendar ParseDateTime(String date, String time)
         {
@@ -73,7 +75,7 @@ public class Stamper
                 return;
             }
 
-            db.collection(mAuth.getUid()).get()
+            FirebaseFirestore.getInstance().collection(mAuth.getUid()).get()
                     .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                         @Override
                         public void onSuccess(QuerySnapshot documentSnapshots) {
@@ -157,7 +159,7 @@ public class Stamper
 
             if(document == null || document.exists() && document.contains(timeSpecifierString))
             {
-                db.collection(mAuth.getUid()).document("Stamp_" + RandomString(10))
+                FirebaseFirestore.getInstance().collection(mAuth.getUid()).document("Stamp_" + RandomString(10))
                         .set(stamp).addOnFailureListener(e -> Log.e(TAG, "Error writing " + timeSpecifierString + ": ", e));
             }
             else if(document.exists() && !document.contains(timeSpecifierString)) // Document exists, but does not have data.

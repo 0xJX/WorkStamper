@@ -2,11 +2,8 @@ package com.app.workstamper;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.app.DatePickerDialog;
-import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,25 +13,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.DatePicker;
 import android.widget.TextView;
-import android.widget.TimePicker;
 import android.widget.Toast;
-
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.SetOptions;
-
 import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     private Button
@@ -59,12 +46,13 @@ public class MainActivity extends AppCompatActivity {
             storedOrganization;
 
     static FirebaseAuth mAuth;
-    static FirebaseFirestore db;
+    FirebaseFirestore db;
 
     private static final String TAG = "MainActivity";
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -88,52 +76,48 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         getMenuInflater().inflate(R.menu.menu, menu);
         return true;
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
         int id = item.getItemId();
 
-        switch (id) {
-            case R.id.history:
+        switch (id)
+        {
+            case (int)R.id.history:
                 startActivity(new Intent(MainActivity.this, HistoryActivity.class));
                 break;
 
-            case R.id.settings:
+            case (int)R.id.settings:
                 Toast.makeText(this, "Settings clicked, no actions configured.", Toast.LENGTH_LONG).show();
                 break;
 
-            case R.id.logout:
-                //Toast.makeText(this, "Logout clicked", Toast.LENGTH_LONG).show(); //For debugging purposes
-
+            case (int)R.id.logout:
                 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                 builder.setTitle("Logout");
                 builder.setMessage("Press OK to logout");
                 builder.setCancelable(false);
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener()
+                {
                     @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
+                    public void onClick(DialogInterface dialogInterface, int i)
+                    {
                         mAuth.signOut();
                         startActivity(new Intent(MainActivity.this, LoginActivity.class));
                     }
                 });
 
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        return;
-                    }
-                });
+                builder.setNegativeButton("Cancel", (dialogInterface, i) -> { /* Do nothing :) */ });
 
                 AlertDialog dialog = builder.create();
                 dialog.show();
-
                 break;
         }
-
         return true;
     }
 
@@ -177,15 +161,18 @@ public class MainActivity extends AppCompatActivity {
 
         // Get names and organization.
         DocumentReference docRef = db.collection("users").document(mAuth.getUid());
-        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>()
+        {
             @SuppressLint("SetTextI18n")
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task)
             {
-                if (task.isSuccessful()) {
+                if (task.isSuccessful())
+                {
                     DocumentSnapshot document = task.getResult();
 
-                    if (document != null && document.exists()) {
+                    if (document != null && document.exists())
+                    {
                         storedUsername = document.getString("firstname");
                         storedLastname = document.getString("lastname");
                         storedOrganization = document.getString("organization");
@@ -217,7 +204,8 @@ public class MainActivity extends AppCompatActivity {
         UpdateWorkingHours();
     }
 
-    void UpdateWorkingHours() {
+    void UpdateWorkingHours()
+    {
         if (!isWorking)
             return;
 
@@ -227,49 +215,14 @@ public class MainActivity extends AppCompatActivity {
         hoursLbl.setText(hoursString);
     }
 
-    public void onClickTime(View view) {
-        Calendar c = Calendar.getInstance();
-        int iHours = c.get(Calendar.HOUR_OF_DAY), iMinutes = c.get(Calendar.MINUTE);
-
-        // Launch TimePicker Dialog
-        TimePickerDialog timePickerDialog = new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
-            @Override
-            public void onTimeSet(TimePicker view, int hours, int minutes) {
-                if (hours >= iHours && minutes > iMinutes || hours > iHours) {
-                    Toast.makeText(getApplicationContext(), "Can't set time to future.", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                //TODO: Add prevention for minus hours when isWorking is set to true.
-
-                selectedDateTime.set(Calendar.HOUR_OF_DAY, hours);
-                selectedDateTime.set(Calendar.MINUTE, minutes);
-                timeBtn.setText(DatetimeHelper.Time.toStringFormat(selectedDateTime));
-                UpdateWorkingHours();
-            }
-        }, iHours, iMinutes, true);
-        timePickerDialog.show();
+    public void onClickTime(View view)
+    {
+        DatetimeHelper.Time.pickerDialog(timeBtn.getContext(), timeBtn, selectedDateTime, true);
     }
 
-    public void onClickDate(View view) {
-        Calendar c = Calendar.getInstance();
-        int iYear = c.get(Calendar.YEAR), iMonth = c.get(Calendar.MONTH), iDay = c.get(Calendar.DAY_OF_MONTH);
-
-        // Launch DatePicker Dialog
-        DatePickerDialog datePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
-            @Override
-            public void onDateSet(DatePicker view, int year, int month, int day) {
-                if (year > iYear || year >= iYear && month > iMonth || year >= iYear && month >= iMonth && day > iDay) {
-                    Toast.makeText(getApplicationContext(), "Can't set date to future.", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                selectedDateTime.set(Calendar.YEAR, year);
-                selectedDateTime.set(Calendar.MONTH, month);
-                selectedDateTime.set(Calendar.DAY_OF_MONTH, day);
-                dateBtn.setText(DatetimeHelper.Date.toStringFormat(selectedDateTime));
-            }
-        }, iYear, iMonth, iDay);
-        datePickerDialog.show();
+    public void onClickDate(View view)
+    {
+        DatetimeHelper.Date.pickerDialog(dateBtn.getContext(), dateBtn, selectedDateTime, true);
     }
 
     public void onClickWork(View view)
@@ -281,12 +234,6 @@ public class MainActivity extends AppCompatActivity {
 
         // Update UI
         UpdateView();
-
-        if (mAuth.getUid() == null) {
-            // This can happen as well if LoginActivity.debugSkipLogin is set to true.
-            Log.e(TAG, "Database collection failed: Authentication was null.");
-            return;
-        }
 
         // Writes data to database, sets "StartDateTime" if isWorking is true.
         Stamper.Database.WriteStamp(storedDateTime, foodBreakBox.isChecked(), isWorking);
