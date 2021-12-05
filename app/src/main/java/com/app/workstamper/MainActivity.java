@@ -1,12 +1,14 @@
 package com.app.workstamper;
 
-import androidx.annotation.NonNull;
+import static com.app.workstamper.LoginActivity.mAuth;
 import androidx.appcompat.app.AppCompatActivity;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,15 +17,15 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
+
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.util.Calendar;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+{
     private Button
             timeBtn,
             dateBtn,
@@ -37,15 +39,15 @@ public class MainActivity extends AppCompatActivity {
             loggedOrgLbl;
     private boolean
             isWorking = false;
+    private Stamper.StampData
+            mainStampData;
     private Calendar
-            selectedDateTime,
-            storedDateTime;
+            selectedDateTime;
     private String
             storedUsername,
             storedLastname,
             storedOrganization;
 
-    static FirebaseAuth mAuth;
     FirebaseFirestore db;
 
     private static final String TAG = "MainActivity";
@@ -56,23 +58,42 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mAuth = FirebaseAuth.getInstance();
+        selectedDateTime = Calendar.getInstance();
+        mainStampData = new Stamper.StampData();
         db = FirebaseFirestore.getInstance();
+
+        TextWatcher timeDateWatcher = new TextWatcher()
+        {
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count)
+            {
+                if(isWorking)
+                    mainStampData.endDateTime = selectedDateTime;
+                hoursLbl.setText(DatetimeHelper.getCountedHours(mainStampData));
+            }
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            @Override public void afterTextChanged(Editable s) { }
+        };
 
         timeBtn = findViewById(R.id.timeButton);
         dateBtn = findViewById(R.id.dateButton);
         stampBtn = findViewById(R.id.stampButton);
+        timeBtn.addTextChangedListener(timeDateWatcher);
+        dateBtn.addTextChangedListener(timeDateWatcher);
         hoursLbl = findViewById(R.id.hoursLabel);
         foodBreakBox = findViewById(R.id.fbreakCheckbox);
 
         loggedUserLbl = findViewById(R.id.LoggedUser);
         loggedOrgLbl = findViewById(R.id.Organization);
 
+        foodBreakBox.setOnCheckedChangeListener((buttonView, isChecked) ->
+        {
+            mainStampData.hadFoodBreak = isChecked;
+            hoursLbl.setText(DatetimeHelper.getCountedHours(mainStampData));
+        });
+
         // Fetch user related strings from database.
         UpdateStoredUserData();
-
-        // Update UI.
-        UpdateView();
     }
 
     @Override
@@ -123,7 +144,8 @@ public class MainActivity extends AppCompatActivity {
 
 
     @Override
-    protected void onStart() {
+    protected void onStart()
+    {
         super.onStart();
 
         // User was null, return back to login. (unless debugSkipLogin is set to true)
@@ -132,8 +154,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    void UpdateStoredUserData() {
-        if (mAuth.getUid() == null) {
+    @SuppressLint("SetTextI18n")
+    void UpdateStoredUserData()
+    {
+        if (mAuth.getUid() == null)
+        {
             Log.e(TAG, "Unable to get stored userdata, authentication was null.");
             return;
         }
@@ -141,6 +166,7 @@ public class MainActivity extends AppCompatActivity {
         // Get work status
         if(Stamper.Database.IsCurrentlyWorking())
         {
+            Log.e(TAG, "Working state returned.");
             DocumentSnapshot document = Stamper.Database.GetLatestDocument();
             if (document != null && document.exists())
             {
@@ -150,22 +176,45 @@ public class MainActivity extends AppCompatActivity {
 
                 if(hadFoodBreak != null && startTime != null && startDate != null)
                 {
-                    Stamper.StampData stampData = new Stamper.StampData(startDate, startTime, hadFoodBreak.contains("true"));
-                    storedDateTime = stampData.startDateTime;
-                    isWorking = true;
-                    UpdateView();
+                    mainStampData.startDateTime = mainStampData.parseDateTime(startDate, startTime);
+                    mainStampData.hadFoodBreak = hadFoodBreak.contains("true");
+                    mainStampData.id = document.getId();
+                    this.isWorking = true;
                 }
             }
         }
 
-
         // Get names and organization.
         DocumentReference docRef = db.collection("users").document(mAuth.getUid());
-        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>()
+        docRef.get().addOnCompleteListener(task ->
         {
-            @SuppressLint("SetTextI18n")
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task)
+            if (task.isSuccessful())
+            {
+                DocumentSnapshot document = task.getResult();
+
+                if (document != null && document.exists())
+                {
+                    storedUsername = document.getString("firstname");
+                    storedLastname = document.getString("lastname");
+                    storedOrganization = document.getString("organization");
+
+                    loggedUserLbl.setText(storedUsername + " " + storedLastname);
+                    loggedOrgLbl.setText(storedOrganization);
+
+                    Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                } else {
+                    Log.e(TAG, "No such document");
+                }
+            } else {
+                Log.e(TAG, "Get failed: ", task.getException());
+            }
+        });
+
+        // Get organization related rules/settings.
+        if(storedOrganization != null)
+        {
+            DocumentReference doc = db.collection("organization").document(storedOrganization);
+            doc.get().addOnCompleteListener(task ->
             {
                 if (task.isSuccessful())
                 {
@@ -173,46 +222,31 @@ public class MainActivity extends AppCompatActivity {
 
                     if (document != null && document.exists())
                     {
-                        storedUsername = document.getString("firstname");
-                        storedLastname = document.getString("lastname");
-                        storedOrganization = document.getString("organization");
-
-                        loggedUserLbl.setText(storedUsername + " " + storedLastname);
-                        loggedOrgLbl.setText(storedOrganization);
-
-                        Log.d(TAG, "DocumentSnapshot data: " + document.getData());
-                    } else {
-                        Log.e(TAG, "No such document");
+                        String storedPenalty = document.getString("FoodBreakPenaltyMinutes");
+                        if(storedPenalty != null)
+                        {
+                            DatetimeHelper.foodBreakPenaltyMinutes = Integer.parseInt(storedPenalty);
+                            Log.d(TAG, "FoodBreakPenaltyMinutes: " + storedPenalty);
+                        }
                     }
                 } else {
                     Log.e(TAG, "Get failed: ", task.getException());
                 }
-            }
-        });
+            });
+        }
+
+        // Update UI.
+        UpdateView();
     }
 
-    void UpdateView() {
-        // Get Current Time
+    void UpdateView()
+    {
         selectedDateTime = Calendar.getInstance();
-
         timeBtn.setText(DatetimeHelper.Time.toStringFormat(selectedDateTime));
         dateBtn.setText(DatetimeHelper.Date.toStringFormat(selectedDateTime));
         stampBtn.setText(this.isWorking ? "Stop work" : "Start work");
         hoursLbl.setVisibility(this.isWorking ? View.VISIBLE : View.INVISIBLE);
         foodBreakBox.setVisibility(this.isWorking ? View.VISIBLE : View.INVISIBLE);
-
-        UpdateWorkingHours();
-    }
-
-    void UpdateWorkingHours()
-    {
-        if (!isWorking)
-            return;
-
-        String hoursString = (selectedDateTime.get(Calendar.HOUR_OF_DAY) - storedDateTime.get(Calendar.HOUR_OF_DAY)) +
-                "h " + (selectedDateTime.get(Calendar.MINUTE) - storedDateTime.get(Calendar.MINUTE)) + "min";
-
-        hoursLbl.setText(hoursString);
     }
 
     public void onClickTime(View view)
@@ -227,15 +261,17 @@ public class MainActivity extends AppCompatActivity {
 
     public void onClickWork(View view)
     {
+        if(!isWorking)
+            mainStampData.startDateTime = selectedDateTime;
+
         isWorking = !isWorking;
 
-        // Copy "selected datetime data" to "start datetime data".
-        storedDateTime = (Calendar) selectedDateTime.clone();
+        Stamper.Database.WriteStamp(mainStampData, isWorking);
 
         // Update UI
-        UpdateView();
+        if(!isWorking)
+            foodBreakBox.setChecked(false);
 
-        // Writes data to database, sets "StartDateTime" if isWorking is true.
-        Stamper.Database.WriteStamp(storedDateTime, foodBreakBox.isChecked(), isWorking);
+        UpdateView();
     }
 }

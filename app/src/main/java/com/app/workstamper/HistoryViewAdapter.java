@@ -1,5 +1,7 @@
 package com.app.workstamper;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +36,25 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
     public void onBindViewHolder(@NonNull ViewHolder holder, int position)
     {
         int pos = holder.getAdapterPosition();
+
+        TextWatcher timeDateWatcher = new TextWatcher()
+        {
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count)
+            {
+                holder.hoursLabel.setText(DatetimeHelper.getCountedHours(stampData.get(pos)));
+                Stamper.Database.UpdateStamp(stampData.get(pos)); // Send changes to server.
+            }
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            @Override public void afterTextChanged(Editable s) { }
+        };
+
+        // Update hours label if any of these changed it.
+        holder.startDateButton.addTextChangedListener(timeDateWatcher);
+        holder.startTimeButton.addTextChangedListener(timeDateWatcher);
+        holder.endTimeButton.addTextChangedListener(timeDateWatcher);
+        holder.endDateButton.addTextChangedListener(timeDateWatcher);
+
         holder.startDateButton.setText(DatetimeHelper.Date.toStringFormat(stampData.get(pos).startDateTime));
         holder.startTimeButton.setText(DatetimeHelper.Time.toStringFormat(stampData.get(pos).startDateTime));
         holder.endTimeButton.setText(DatetimeHelper.Time.toStringFormat(stampData.get(pos).endDateTime));
@@ -54,18 +75,21 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
                 DatetimeHelper.Date.pickerDialog(holder.endDateButton, stampData.get(pos).endDateTime, false));
 
         holder.foodBreakCheckBox.setOnCheckedChangeListener((buttonView, isChecked) ->
-                stampData.get(pos).hadFoodBreak = isChecked);
-
-        holder.deleteButton.setOnClickListener(new View.OnClickListener()
         {
-            @Override
-            public void onClick(View view)
-            {
-                stampData.remove(stampData.get(pos));
-                stampData.trimToSize();
-                notifyItemRemoved(pos);
-                notifyItemRangeChanged(0, stampData.size()); // Update item range.
-            }
+            stampData.get(pos).hadFoodBreak = isChecked;
+            holder.hoursLabel.setText(DatetimeHelper.getCountedHours(stampData.get(pos)));
+            Stamper.Database.UpdateStamp(stampData.get(pos));
+        });
+
+
+        holder.deleteButton.setOnClickListener(view ->
+        {
+            Stamper.Database.DeleteStamp(stampData.get(pos));
+            Stamper.Database.UpdateDocumentArray();
+            stampData.remove(stampData.get(pos));
+            stampData.trimToSize();
+            notifyItemRemoved(pos);
+            notifyItemRangeChanged(0, stampData.size()); // Update item range.
         });
     }
 

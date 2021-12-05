@@ -19,7 +19,6 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity
 {
@@ -34,7 +33,7 @@ public class LoginActivity extends AppCompatActivity
             debugSkipLogin = false; // Set this to true, if you want to skip login auth.
 
     Config config;
-    FirebaseAuth mAuth;
+    static FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -94,7 +93,8 @@ public class LoginActivity extends AppCompatActivity
                 {
                     if(!debugSkipLogin)
                     {
-                        // Sign in success, update UI with the signed-in user's information
+                        // Sign in success.
+                        Stamper.Database.UpdateDocumentArray();
                         Log.d(TAG, "signInWithEmail:success");
                     }
 
