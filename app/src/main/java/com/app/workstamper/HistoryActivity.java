@@ -1,18 +1,11 @@
 package com.app.workstamper;
 
 import android.os.Bundle;
-import android.util.Log;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.google.firebase.firestore.DocumentSnapshot;
-
-import org.w3c.dom.Document;
-
 import java.util.ArrayList;
-import java.util.Calendar;
 
 public class HistoryActivity extends AppCompatActivity
 {
