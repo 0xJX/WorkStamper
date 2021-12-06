@@ -24,15 +24,15 @@ public class DatetimeHelper
 
         while(true) // Loop until we have converted the datetime.
         {
-            if (months < 0)
+            if (months < 0 && years > 0)
             {
                 years--;
                 months = 12 + months;
-            }else if (days < 0)
+            }else if (days < 0 && (months > 0 || years > 0))
             {
                 months--;
                 days = stampData.startDateTime.getActualMaximum(Calendar.DATE) + days;
-            }else if (hours < 0)
+            }else if (hours < 0 && (days > 0 || months > 0 || years > 0))
             {
                 days--;
                 hours = stampData.startDateTime.getActualMaximum(Calendar.HOUR_OF_DAY) + hours;
