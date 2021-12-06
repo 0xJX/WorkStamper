@@ -52,10 +52,11 @@ public class Stamper
             endDateTime = (Calendar)Calendar.getInstance().clone();
         }
 
-        public StampData(String startDate, String endDate, String startTime, String endTime, boolean hadFoodBreak)
+        public StampData(String startDate, String endDate, String startTime, String endTime, boolean hadFoodBreak, String id)
         {
             startDateTime = parseDateTime(startDate, startTime);
             endDateTime = parseDateTime(endDate, endTime);
+            this.id = id;
             this.hadFoodBreak = hadFoodBreak;
         }
     }
