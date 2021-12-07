@@ -55,11 +55,13 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
         holder.endTimeButton.addTextChangedListener(timeDateWatcher);
         holder.endDateButton.addTextChangedListener(timeDateWatcher);
 
+
         holder.startDateButton.setText(DatetimeHelper.Date.toStringFormat(stampData.get(pos).startDateTime));
         holder.startTimeButton.setText(DatetimeHelper.Time.toStringFormat(stampData.get(pos).startDateTime));
         holder.endTimeButton.setText(DatetimeHelper.Time.toStringFormat(stampData.get(pos).endDateTime));
         holder.endDateButton.setText(DatetimeHelper.Date.toStringFormat(stampData.get(pos).endDateTime));
         holder.idLabel.setText(stampData.get(pos).id);
+        holder.typeLabel.setVisibility(stampData.get(pos).type.equals("Normal") ? View.INVISIBLE : View.VISIBLE);
         holder.foodBreakCheckBox.setChecked(stampData.get(pos).hadFoodBreak);
 
         holder.startTimeButton.setOnClickListener(v ->
@@ -103,6 +105,7 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
     {
         TextView
             idLabel,
+            typeLabel,
             hoursLabel;
         Button
             startTimeButton,
@@ -121,8 +124,9 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
             super(view);
             rootView = view;
 
-            hoursLabel = view.findViewById(R.id.hoursLbl);
             idLabel = view.findViewById(R.id.stampIdLbl);
+            typeLabel = view.findViewById(R.id.stampTypeLbl);
+            hoursLabel = view.findViewById(R.id.hoursLbl);
 
             startTimeButton = view.findViewById(R.id.startTimeBtn);
             startDateButton = view.findViewById(R.id.startDateBtn);

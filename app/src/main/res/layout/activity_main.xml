@@ -60,7 +60,7 @@
         android:id="@+id/textView5"
         android:layout_width="138dp"
         android:layout_height="19dp"
-        android:layout_marginTop="144dp"
+        android:layout_marginTop="130dp"
         android:text="Select time:"
         android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="parent"
@@ -116,5 +116,35 @@
         android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/stampButton"
         app:layout_constraintEnd_toEndOf="parent" />
+
+    <RadioGroup
+        android:id="@+id/radGroup"
+        android:layout_width="343dp"
+        android:layout_height="71dp"
+        android:layout_marginTop="5dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/dateButton">
+
+        <RadioButton
+            android:id="@+id/normalRbtn"
+            android:layout_width="172dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:checked="true"
+            android:text="Normal hours"
+            android:textAlignment="center"
+            android:textSize="18sp" />
+
+        <RadioButton
+            android:id="@+id/overtimeRbtn"
+            android:layout_width="172dp"
+            android:layout_height="71dp"
+            android:text="Overtime"
+            android:textAlignment="center"
+            android:textSize="18sp" />
+
+    </RadioGroup>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

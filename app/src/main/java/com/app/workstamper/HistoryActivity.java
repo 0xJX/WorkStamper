@@ -40,12 +40,16 @@ public class HistoryActivity extends AppCompatActivity
                 startTime = document.getString("StartTime"),
                 startDate = document.getString("StartDate"),
                 endTime = document.getString("EndTime"),
+                type = document.getString("StampType"),
                 endDate = document.getString("EndDate");
 
             if(startTime == null || hadFoodBreak == null)
                 continue;
 
-            stampData.add(new Stamper.StampData(startDate, endDate, startTime, endTime, hadFoodBreak.contains("true"), document.getId()));
+            if(type == null)
+                type = "Normal";
+
+            stampData.add(new Stamper.StampData(startDate, endDate, startTime, endTime, hadFoodBreak.contains("true"), type, document.getId()));
         }
 
         historyView = findViewById(R.id.rView);

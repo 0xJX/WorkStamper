@@ -15,6 +15,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,6 +35,10 @@ public class MainActivity extends AppCompatActivity
 
     private CheckBox
             foodBreakBox;
+    private RadioGroup
+            radioGroup;
+    private RadioButton
+            normalhoursBtn;
     private TextView
             hoursLbl,
             loggedUserLbl,
@@ -82,6 +88,8 @@ public class MainActivity extends AppCompatActivity
         dateBtn.addTextChangedListener(timeDateWatcher);
         hoursLbl = findViewById(R.id.hoursLabel);
         foodBreakBox = findViewById(R.id.fbreakCheckbox);
+        normalhoursBtn = findViewById(R.id.normalRbtn);
+        radioGroup = findViewById(R.id.radGroup);
 
         loggedUserLbl = findViewById(R.id.LoggedUser);
         loggedOrgLbl = findViewById(R.id.Organization);
@@ -245,6 +253,7 @@ public class MainActivity extends AppCompatActivity
         timeBtn.setText(DatetimeHelper.Time.toStringFormat(selectedDateTime));
         dateBtn.setText(DatetimeHelper.Date.toStringFormat(selectedDateTime));
         stampBtn.setText(this.isWorking ? "Stop work" : "Start work");
+        radioGroup.setVisibility(this.isWorking ? View.INVISIBLE : View.VISIBLE);
         hoursLbl.setVisibility(this.isWorking ? View.VISIBLE : View.INVISIBLE);
         foodBreakBox.setVisibility(this.isWorking ? View.VISIBLE : View.INVISIBLE);
     }
@@ -262,7 +271,10 @@ public class MainActivity extends AppCompatActivity
     public void onClickWork(View view)
     {
         if(!isWorking)
+        {
             mainStampData.startDateTime = selectedDateTime;
+            mainStampData.type = (radioGroup.getCheckedRadioButtonId() == R.id.overtimeRbtn) ? "Overtime" : "Normal";
+        }
 
         isWorking = !isWorking;
 
@@ -270,7 +282,10 @@ public class MainActivity extends AppCompatActivity
 
         // Update UI
         if(!isWorking)
+        {
+            normalhoursBtn.setChecked(true);
             foodBreakBox.setChecked(false);
+        }
 
         UpdateView();
     }

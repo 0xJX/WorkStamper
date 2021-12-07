@@ -28,7 +28,8 @@ public class Stamper
         public boolean
                 hadFoodBreak = false;
         public String
-                id = "ID_NOT_SET";
+                id = "ID_NOT_SET",
+                type = "Normal";
 
         public Calendar parseDateTime(String date, String time)
         {
@@ -52,10 +53,11 @@ public class Stamper
             endDateTime = (Calendar)Calendar.getInstance().clone();
         }
 
-        public StampData(String startDate, String endDate, String startTime, String endTime, boolean hadFoodBreak, String id)
+        public StampData(String startDate, String endDate, String startTime, String endTime, boolean hadFoodBreak, String type, String id)
         {
             startDateTime = parseDateTime(startDate, startTime);
             endDateTime = parseDateTime(endDate, endTime);
+            this.type = type;
             this.id = id;
             this.hadFoodBreak = hadFoodBreak;
         }
@@ -124,6 +126,7 @@ public class Stamper
                     stamp.put("StartTime", DatetimeHelper.Time.toStringFormat(stampData.startDateTime));
                     stamp.put("EndDate", DatetimeHelper.Date.toStringFormat(stampData.endDateTime));
                     stamp.put("EndTime", DatetimeHelper.Time.toStringFormat(stampData.endDateTime));
+                    stamp.put("StampType", stampData.type);
                     stamp.put("HadFoodBreak", stampData.hadFoodBreak ? "true" : "false");
 
                     docRef.set(stamp, SetOptions.merge()).addOnFailureListener(e ->
@@ -215,6 +218,7 @@ public class Stamper
             stamp.put(timeSpecifierString, DatetimeHelper.Time.toStringFormat(c));
             stamp.put(isStartDateTime ? "StartDate" : "EndDate", DatetimeHelper.Date.toStringFormat(c));
             stamp.put("HadFoodBreak", stampData.hadFoodBreak ? "true" : "false");
+            stamp.put("StampType", stampData.type);
             stamp.put("Timestamp", Long.toString(System.currentTimeMillis() / 1000L));
 
             if(document == null || document.exists() && document.contains(timeSpecifierString))
