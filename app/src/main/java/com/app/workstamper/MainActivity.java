@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity
     private RadioGroup
             radioGroup;
     private RadioButton
-            normalhoursBtn;
+            normalHoursBtn;
     private TextView
             hoursLbl,
             loggedUserLbl,
@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity
         dateBtn.addTextChangedListener(timeDateWatcher);
         hoursLbl = findViewById(R.id.hoursLabel);
         foodBreakBox = findViewById(R.id.fbreakCheckbox);
-        normalhoursBtn = findViewById(R.id.normalRbtn);
+        normalHoursBtn = findViewById(R.id.normalRbtn);
         radioGroup = findViewById(R.id.radGroup);
 
         loggedUserLbl = findViewById(R.id.LoggedUser);
@@ -122,23 +122,15 @@ public class MainActivity extends AppCompatActivity
                 startActivity(new Intent(MainActivity.this, HistoryActivity.class));
                 break;
 
-            case (int)R.id.settings:
-                Toast.makeText(this, "Settings clicked, no actions configured.", Toast.LENGTH_LONG).show();
-                break;
-
             case (int)R.id.logout:
                 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                 builder.setTitle("Logout");
                 builder.setMessage("Press OK to logout");
                 builder.setCancelable(false);
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener()
+                builder.setPositiveButton("OK", (dialogInterface, i) ->
                 {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i)
-                    {
-                        mAuth.signOut();
-                        startActivity(new Intent(MainActivity.this, LoginActivity.class));
-                    }
+                    mAuth.signOut();
+                    startActivity(new Intent(MainActivity.this, LoginActivity.class));
                 });
 
                 builder.setNegativeButton("Cancel", (dialogInterface, i) -> { /* Do nothing :) */ });
@@ -149,7 +141,6 @@ public class MainActivity extends AppCompatActivity
         }
         return true;
     }
-
 
     @Override
     protected void onStart()
@@ -283,7 +274,7 @@ public class MainActivity extends AppCompatActivity
         // Update UI
         if(!isWorking)
         {
-            normalhoursBtn.setChecked(true);
+            normalHoursBtn.setChecked(true);
             foodBreakBox.setChecked(false);
         }
 
