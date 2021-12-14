@@ -148,7 +148,7 @@ public class MainActivity extends AppCompatActivity
         super.onStart();
 
         // User was null, return back to login. (unless debugSkipLogin is set to true)
-        if (mAuth.getCurrentUser() == null && !LoginActivity.debugSkipLogin) {
+        if (mAuth == null || mAuth.getCurrentUser() == null && !LoginActivity.debugSkipLogin) {
             startActivity(new Intent(MainActivity.this, LoginActivity.class));
         }
     }
@@ -156,7 +156,7 @@ public class MainActivity extends AppCompatActivity
     @SuppressLint("SetTextI18n")
     void UpdateStoredUserData()
     {
-        if (mAuth.getUid() == null)
+        if (mAuth == null || mAuth.getUid() == null)
         {
             Log.e(TAG, "Unable to get stored userdata, authentication was null.");
             return;

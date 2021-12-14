@@ -35,15 +35,17 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position)
     {
-        int pos = holder.getAdapterPosition();
+        // Invalid position, return.
+        if(holder.getAdapterPosition() >= stampData.size())
+            return;
 
         TextWatcher timeDateWatcher = new TextWatcher()
         {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count)
             {
-                holder.hoursLabel.setText(DatetimeHelper.getCountedHours(stampData.get(pos)));
-                Stamper.Database.UpdateStamp(stampData.get(pos)); // Send changes to server.
+                holder.hoursLabel.setText(DatetimeHelper.getCountedHours(stampData.get(holder.getAdapterPosition())));
+                Stamper.Database.UpdateStamp(stampData.get(holder.getAdapterPosition())); // Send changes to server.
             }
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
             @Override public void afterTextChanged(Editable s) { }
@@ -56,41 +58,41 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
         holder.endDateButton.addTextChangedListener(timeDateWatcher);
 
 
-        holder.startDateButton.setText(DatetimeHelper.Date.toStringFormat(stampData.get(pos).startDateTime));
-        holder.startTimeButton.setText(DatetimeHelper.Time.toStringFormat(stampData.get(pos).startDateTime));
-        holder.endTimeButton.setText(DatetimeHelper.Time.toStringFormat(stampData.get(pos).endDateTime));
-        holder.endDateButton.setText(DatetimeHelper.Date.toStringFormat(stampData.get(pos).endDateTime));
-        holder.idLabel.setText(stampData.get(pos).id);
-        holder.typeLabel.setVisibility(stampData.get(pos).type.equals("Normal") ? View.INVISIBLE : View.VISIBLE);
-        holder.foodBreakCheckBox.setChecked(stampData.get(pos).hadFoodBreak);
+        holder.startDateButton.setText(DatetimeHelper.Date.toStringFormat(stampData.get(holder.getAdapterPosition()).startDateTime));
+        holder.startTimeButton.setText(DatetimeHelper.Time.toStringFormat(stampData.get(holder.getAdapterPosition()).startDateTime));
+        holder.endTimeButton.setText(DatetimeHelper.Time.toStringFormat(stampData.get(holder.getAdapterPosition()).endDateTime));
+        holder.endDateButton.setText(DatetimeHelper.Date.toStringFormat(stampData.get(holder.getAdapterPosition()).endDateTime));
+        holder.idLabel.setText(stampData.get(holder.getAdapterPosition()).id);
+        holder.typeLabel.setVisibility(stampData.get(holder.getAdapterPosition()).type.equals("Normal") ? View.INVISIBLE : View.VISIBLE);
+        holder.foodBreakCheckBox.setChecked(stampData.get(holder.getAdapterPosition()).hadFoodBreak);
 
         holder.startTimeButton.setOnClickListener(v ->
-                DatetimeHelper.Time.pickerDialog(holder.startTimeButton, stampData.get(pos).startDateTime, false));
+                DatetimeHelper.Time.pickerDialog(holder.startTimeButton, stampData.get(holder.getAdapterPosition()).startDateTime, false));
 
         holder.startDateButton.setOnClickListener(v ->
-                DatetimeHelper.Date.pickerDialog(holder.startDateButton, stampData.get(pos).startDateTime, false));
+                DatetimeHelper.Date.pickerDialog(holder.startDateButton, stampData.get(holder.getAdapterPosition()).startDateTime, false));
 
         holder.endTimeButton.setOnClickListener(v ->
-                DatetimeHelper.Time.pickerDialog(holder.endTimeButton, stampData.get(pos).endDateTime, false));
+                DatetimeHelper.Time.pickerDialog(holder.endTimeButton, stampData.get(holder.getAdapterPosition()).endDateTime, false));
 
         holder.endDateButton.setOnClickListener(v ->
-                DatetimeHelper.Date.pickerDialog(holder.endDateButton, stampData.get(pos).endDateTime, false));
+                DatetimeHelper.Date.pickerDialog(holder.endDateButton, stampData.get(holder.getAdapterPosition()).endDateTime, false));
 
         holder.foodBreakCheckBox.setOnCheckedChangeListener((buttonView, isChecked) ->
         {
-            stampData.get(pos).hadFoodBreak = isChecked;
-            holder.hoursLabel.setText(DatetimeHelper.getCountedHours(stampData.get(pos)));
-            Stamper.Database.UpdateStamp(stampData.get(pos));
+            stampData.get(holder.getAdapterPosition()).hadFoodBreak = isChecked;
+            holder.hoursLabel.setText(DatetimeHelper.getCountedHours(stampData.get(holder.getAdapterPosition())));
+            Stamper.Database.UpdateStamp(stampData.get(holder.getAdapterPosition()));
         });
 
 
         holder.deleteButton.setOnClickListener(view ->
         {
-            Stamper.Database.DeleteStamp(stampData.get(pos));
+            Stamper.Database.DeleteStamp(stampData.get(holder.getAdapterPosition()));
             Stamper.Database.UpdateDocumentArray();
-            stampData.remove(stampData.get(pos));
+            stampData.remove(stampData.get(holder.getAdapterPosition()));
             stampData.trimToSize();
-            notifyItemRemoved(pos);
+            notifyItemRemoved(holder.getAdapterPosition());
             notifyItemRangeChanged(0, stampData.size()); // Update item range.
         });
     }
